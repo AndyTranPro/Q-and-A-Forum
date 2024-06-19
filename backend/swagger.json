@@ -1,0 +1,1116 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Qanda CRUD Server",
+    "description": "Server that powers the Qanda frontend",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Managing user authentication and authorization"
+    },
+    {
+      "name": "Thread",
+      "description": "Creating and managing threads"
+    },
+    {
+      "name": "Comment",
+      "description": "Creating and managing comments"
+    },
+    {
+      "name": "Users",
+      "description": "Managing user profiles"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Token": {
+        "type": "string",
+        "description": "Token to provide authorization",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhheWRlbkB1bnN3LmVkdS5hdSIsImlhdCI6MTYwMzk0MzIzMH0.b37PfwlcH_cue6yhgvDt2IiNvhRACf79hTNtacYB94Q"
+      },
+      "Start": {
+        "type": "integer",
+        "description": "Starting index for pagination",
+        "example": 0
+      },
+      "Email": {
+        "type": "string",
+        "description": "User's email address",
+        "example": "betty@email.com"
+      },
+      "Password": {
+        "type": "string",
+        "description": "User's password",
+        "example": "cardigan"
+      },
+      "UserName": {
+        "type": "string",
+        "description": "User's name",
+        "example": "Betty"
+      },
+      "UserId": {
+        "type": "number",
+        "description": "ID of the user",
+        "example": 61021
+      },
+      "UserAdmin": {
+        "type": "boolean",
+        "description": "Whether the user is an admin or not",
+        "example": false
+      },
+      "UserImage": {
+        "type": "string",
+        "description": "User's profile image (stored as base64). You will get out what you put in",
+        "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+      },
+      "User": {
+        "type": "object",
+        "description": "Detailed information of the user",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "name": {
+            "$ref": "#/components/schemas/UserName"
+          },
+          "image": {
+            "$ref": "#/components/schemas/UserImage"
+          }
+        }
+      },
+      "UserFull": {
+        "type": "object",
+        "description": "Detailed information of the user",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "name": {
+            "$ref": "#/components/schemas/UserName"
+          },
+          "image": {
+            "$ref": "#/components/schemas/UserImage"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/UserAdmin"
+          }
+        }
+      },
+      "ThreadPublic": {
+        "type": "boolean",
+        "description": "Whether or not a particular thread is public",
+        "example": true
+      },
+      "ThreadLock": {
+        "type": "boolean",
+        "description": "Whether or not a particular thread is locked",
+        "example": true
+      },
+      "TurnOn": {
+        "type": "boolean",
+        "description": "True if should add/enable, false if should remove/disable",
+        "example": true
+      },
+      "ThreadIds": {
+        "type": "array",
+        "description": "Array of all the threads that user can see",
+        "items": {
+          "$ref": "#/components/schemas/ThreadId"
+        }
+      },
+      "UserIds": {
+        "type": "array",
+        "description": "List of user IDs",
+        "items": {
+          "$ref": "#/components/schemas/UserId"
+        }
+      },
+      "ThreadBasic": {
+        "type": "object",
+        "description": "Basic details of the thread",
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/ThreadTitle"
+          },
+          "isPublic": {
+            "$ref": "#/components/schemas/ThreadPublic"
+          },
+          "content": {
+            "$ref": "#/components/schemas/ThreadContent"
+          }
+        }
+      },
+      "ThreadMid": {
+        "type": "object",
+        "description": "Mid details of the thread",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ThreadId"
+          },
+          "title": {
+            "$ref": "#/components/schemas/ThreadTitle"
+          },
+          "isPublic": {
+            "$ref": "#/components/schemas/ThreadPublic"
+          },
+          "lock": {
+            "$ref": "#/components/schemas/ThreadLock"
+          },
+          "content": {
+            "$ref": "#/components/schemas/ThreadContent"
+          }
+        }
+      },
+      "ThreadFull": {
+        "type": "object",
+        "description": "Full details of the thread",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ThreadId"
+          },
+          "title": {
+            "$ref": "#/components/schemas/ThreadTitle"
+          },
+          "isPublic": {
+            "$ref": "#/components/schemas/ThreadPublic"
+          },
+          "lock": {
+            "$ref": "#/components/schemas/ThreadLock"
+          },
+          "content": {
+            "$ref": "#/components/schemas/ThreadContent"
+          },
+          "creatorId": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "likes": {
+            "type": "array",
+            "description": "Array of all the users who have liked this thread",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          },
+          "watchees": {
+            "type": "array",
+            "description": "Array of all the user IDs who are watching this thread",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          }
+        }
+      },
+      "ThreadTitle": {
+        "type": "string",
+        "description": "Name of the thread",
+        "example": "COO for cupcake factory"
+      },
+      "ThreadContent": {
+        "type": "string",
+        "description": "Body of the thread post",
+        "example": "Does anyone know what the answer to the question is??"
+      },
+      "CommentContent": {
+        "type": "string",
+        "description": "Comment on a thread post",
+        "example": "I know the answer and I can help out!"
+      },
+      "CommentInputPut": {
+        "type": "object",
+        "description": "Details relating to the updating of a comment",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CommentId"
+          },
+          "content": {
+            "$ref": "#/components/schemas/CommentContent"
+          }
+        }
+      },
+      "CommentInputNew": {
+        "type": "object",
+        "description": "Details relating to the creating of a comment",
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/CommentContent"
+          },
+          "threadId": {
+            "$ref": "#/components/schemas/ThreadId"
+          },
+          "parentCommentId": {
+            "$ref": "#/components/schemas/CommentIdNullable"
+          }
+        }
+      },
+    
+      "ThreadId": {
+        "type": "number",
+        "description": "ID of the thread",
+        "example": 528491
+      },
+      "CommentId": {
+        "type": "number",
+        "description": "ID of the comment",
+        "example": 528491
+      },
+      "CommentIdNullable": {
+        "type": "number",
+        "description": "ID of a comment that can also be nullable",
+        "nullable": true,
+        "example": 528491
+      },
+      "CommentList": {
+        "type": "object",
+        "description": "Detail of a particular comment",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CommentId"
+          },
+          "threadId": {
+            "$ref": "#/components/schemas/ThreadId"
+          },
+          "likes": {
+            "type": "array",
+            "description": "Array of all the users who have liked this comment",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          },
+          "content": {
+            "$ref": "#/components/schemas/CommentContent"
+          },
+          "parentCommentId": {
+            "$ref": "#/components/schemas/CommentIdNullable"
+          },
+          "creatorId": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "Timestamp": {
+        "type": "string",
+        "description": "Timestamp string in simplified extended ISO format",
+        "example": "2011-10-05T14:48:00.000Z"
+      }
+    },
+    "parameters": {
+      "Authorization": {
+        "name": "Authorization",
+        "in": "header",
+        "description": "User's authorised token",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Token"
+        }
+      },
+      "UserIdParam": {
+        "name": "userId",
+        "in": "query",
+        "description": "User ID",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UserId"
+        }
+      },
+      "PaginationStart": {
+        "name": "start",
+        "in": "query",
+        "description": "Start Index",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Start"
+        }
+      },
+      "ThreadId": {
+        "name": "id",
+        "in": "query",
+        "description": "ThreadId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ThreadId"
+        }
+      },
+      "CommentThreadId": {
+        "name": "threadId",
+        "in": "query",
+        "description": "ThreadId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ThreadId"
+        }
+      }
+    },
+    "responses": {
+      "Success": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AccessError": {
+        "description": "Access error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid token"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InputError": {
+        "description": "Input error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid input"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Registers a user in the application",
+        "description": "Given user details, registers the user and returns an authorised access token for making subsequent calls",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "$ref": "#/components/schemas/Email"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/Password"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/UserName"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "$ref": "#/components/schemas/Token"
+                    },
+                    "userId": {
+                      "$ref": "#/components/schemas/UserId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logs a user in to the application",
+        "description": "Given correct user credentials, returns an authorised access token for making subsequent calls",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "$ref": "#/components/schemas/Email"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/Password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "$ref": "#/components/schemas/Token"
+                    },
+                    "userId": {
+                      "$ref": "#/components/schemas/UserId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          }
+        }
+      }
+    },
+    "/threads": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Get a list of all threads",
+        "description": "Returns the details of the next five threads, beginning from the 'Start Index'",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationStart"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadIds"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/thread": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Create a new thread",
+        "description": "Create a new thread with the given details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreadBasic"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Object containing the Thread ID of the newly created thread",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/components/schemas/ThreadId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Update a thread",
+        "description": "Update fields on a existing thread",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreadMid"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Get a thread's details",
+        "description": "Get all of a thread's details",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ThreadId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Object containing the Thread ID of the newly created thread",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/components/schemas/ThreadFull"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Delete a thread",
+        "description": "Delete a thread given a particular thread ID",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/ThreadId"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/thread/like": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Like or unlike a thread",
+        "description": "Allow the current user to like or unlike a thread from a user they are watching. If 'on' is set to true then the action 'likes' a thread. If 'on' is set to false, then the action unlikes a thread",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/ThreadId"
+                  },
+                  "turnon": {
+                    "$ref": "#/components/schemas/TurnOn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/thread/watch": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Thread"
+        ],
+        "summary": "Watch or unwatch a thread",
+        "description": "Allow the current user to watch or unwatch a thread. If 'on' is set to true then the action starts watching a thread. If 'on' is set to false, then the action unwatches a thread.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/ThreadId"
+                  },
+                  "turnon": {
+                    "$ref": "#/components/schemas/TurnOn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/comments": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Comments and details",
+        "description": "Get all comments and details for a thread",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CommentThreadId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "Object containing all the comments and associated information",
+                  "properties": {
+                    "$ref": "#/components/schemas/CommentList"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/comment": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Create a new comment",
+        "description": "Create a new comment with the given details. NOTE THAT THE PARENT COMMENT ID CAN BE NULL!",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentInputNew"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Object containing the Comment ID of the newly created comment",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/components/schemas/CommentId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Update a comment",
+        "description": "Update fields on a existing comment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentInputPut"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Delete a comment",
+        "description": "Delete a comment given a particular comment ID",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/CommentId"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/comment/like": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Like or unlike a comment",
+        "description": "Allow the current user to like or unlike a comment from a user they are watching. If 'on' is set to true then the action 'likes' a comment. If 'on' is set to false, then the action unlikes a comment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/CommentId"
+                  },
+                  "turnon": {
+                    "$ref": "#/components/schemas/TurnOn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get the details of a specific user",
+        "description": "Returns basic details of a specific user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserFull"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user's own profile",
+        "description": "Updates the users' email, password, name, and/or image with the given details. It will only update defined fields provided. Any fields given that are undefined will remain unchanged.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "$ref": "#/components/schemas/Email"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/Password"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/UserName"
+                  },
+                  "image": {
+                    "$ref": "#/components/schemas/UserImage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    },
+    "/user/admin": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "Determining whether this user is an admin",
+        "description": "Specify whether this user should be an admin or not",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "$ref": "#/components/parameters/UserId"
+                  },
+                  "turnon": {
+                    "$ref": "#/components/schemas/TurnOn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/InputError"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessError"
+          }
+        }
+      }
+    }
+  }
+}
